@@ -3,3 +3,4 @@
 add.o
 libadd.a
 libadd.so
+main
