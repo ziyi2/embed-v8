@@ -14,7 +14,7 @@
 
 ## 引入使用
 
-将 V8 官方的 10.2.154.4 版本的 [Hello World Example](https://github.com/v8/v8/blob/10.2.154.4/samples/hello-world.cc) 引入 main.cpp 使用，例如
+将 V8 官方的 10.2.154.4 版本的 [Hello World Example](https://github.com/v8/v8/blob/10.2.154.4/samples/hello-world.cc) 引入 `main.cpp` 使用，例如
 
 ``` c++
 #include <stdio.h>
@@ -120,7 +120,7 @@ Hello, World!
 > 温馨提示：例如 TypeScript 中的 tsc 命令，当项目复杂后，需要使用类似 Gulp 或者 Webpack 的编译工具。
 
 
-安装完成后，在项目目录下新建 `CMakeLists.txt` 配置文件，配置如下：
+安装完成后，在项目根目录下新建 `CMakeLists.txt` 配置文件，配置如下：
 
 ``` txt
 # 最低要求版本
