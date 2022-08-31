@@ -1,0 +1,2 @@
+#!/bin/bash
+exec "/usr/local/Cellar/v8/10.2.154.4/libexec/d8" "$@"

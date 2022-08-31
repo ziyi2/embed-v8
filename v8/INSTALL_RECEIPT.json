@@ -1,0 +1,40 @@
+{
+  "homebrew_version": "3.5.10",
+  "used_options": [
+
+  ],
+  "unused_options": [
+
+  ],
+  "built_as_bottle": true,
+  "poured_from_bottle": true,
+  "installed_as_dependency": false,
+  "installed_on_request": true,
+  "changed_files": null,
+  "time": 1661392650,
+  "source_modified_time": 0,
+  "compiler": "clang",
+  "aliases": [
+    "v8@10.2"
+  ],
+  "runtime_dependencies": [
+
+  ],
+  "source": {
+    "path": "/usr/local/Homebrew/Library/Taps/homebrew/homebrew-core/Formula/v8.rb",
+    "tap": "homebrew/core",
+    "tap_git_head": "204c2637872e0c51a1f913c77b594694098c087d",
+    "spec": "stable",
+    "versions": {
+      "stable": "10.2.154.4",
+      "head": null,
+      "version_scheme": 0
+    }
+  },
+  "arch": "x86_64",
+  "built_on": {
+    "os": "Macintosh",
+    "os_version": "macOS 12",
+    "cpu_family": "kabylake"
+  }
+}
