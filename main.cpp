@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+// 不需要使用 include/libplatform/libplatform.h
 #include "libplatform/libplatform.h"
 
 // #include "include/v8-context.h"
@@ -11,6 +12,7 @@
 // #include "include/v8-primitive.h"
 
 // 这里简单起见，引入包含上述头文件的 V8 库的头文件
+// 注意在编译时会指定头文件的搜索目录 -I 为 ./v8/include，因此不需要使用 include/v8.h
 #include "v8.h"
 
 int main(int argc, char* argv[]) {

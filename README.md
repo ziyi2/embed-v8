@@ -21,7 +21,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "include/libplatform/libplatform.h"
+// 不需要使用 include/libplatform/libplatform.h
+#include "libplatform/libplatform.h"
 
 // #include "include/v8-context.h"
 // #include "include/v8-initialization.h"
@@ -29,8 +30,9 @@
 // #include "include/v8-local-handle.h"
 // #include "include/v8-primitive.h"
 
-// 这里简单起见，引入包含上述头文件的 V8 头文件
-#include "include/v8.h"
+// 这里简单起见，引入包含上述头文件的 V8 库的头文件
+// 注意在编译时会指定头文件的搜索目录 -I 为 ./v8/include，因此不需要使用 include/v8.h
+#include "v8.h"
 
 int main(int argc, char* argv[]) {
   // Initialize V8.
@@ -102,7 +104,7 @@ int main(int argc, char* argv[]) {
 # -l：链接 lib 目录下的 libv8.dylib 和 libv8_libplatform.dylib 两个动态库
 # -std：使用 c++14 标准
 # -D：编译时宏定义 V8_COMPRESS_POINTERS，开启 V8 的指针压缩
-g++ main.cpp -o main -Iv8 -Lv8 -lv8 -lv8_libplatform -std=c++14 -DV8_COMPRESS_POINTERS
+g++ main.cpp -o main -Iv8/include -Lv8 -lv8 -lv8_libplatform -std=c++14 -DV8_COMPRESS_POINTERS
 # 执行
 ./main
 Hello, World!
