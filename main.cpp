@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "include/libplatform/libplatform.h"
+#include "libplatform/libplatform.h"
 
 // #include "include/v8-context.h"
 // #include "include/v8-initialization.h"
@@ -11,7 +11,7 @@
 // #include "include/v8-primitive.h"
 
 // 这里简单起见，引入包含上述头文件的 V8 库的头文件
-#include "include/v8.h"
+#include "v8.h"
 
 int main(int argc, char* argv[]) {
   // Initialize V8.

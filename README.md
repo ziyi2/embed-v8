@@ -8,7 +8,7 @@
 ``` 
 ├── v8 						# 库源码
 │   ├── inclide/ 	# 头文件
-│   ├── lib/		  # 动态库
+│   └── lib/			# 动态库
 └── main.cpp 			# 应用源码
 ```
 
@@ -97,7 +97,63 @@ int main(int argc, char* argv[]) {
 
 ``` bash
 # 编译
+# -I：搜索头文件时搜索当前项目的 v8 目录下的头文件，因此 include/v8.h 可以被识别
+# -L：指定动态库的搜索目录为 v8
+# -l：链接 lib 目录下的 libv8.dylib 和 libv8_libplatform.dylib 两个动态库
+# -std：使用 c++14 标准
+# -D：编译时宏定义 V8_COMPRESS_POINTERS，开启 V8 的指针压缩
 g++ main.cpp -o main -Iv8 -Lv8 -lv8 -lv8_libplatform -std=c++14 -DV8_COMPRESS_POINTERS
 # 执行
 ./main
+Hello, World!
+```
+
+当 C++ 项目越来越庞大时，使用单条 g++ 命令可能无法满足我们的开发诉求，在 C++ 中可以使用 [CMake](https://cmake.org/)，首先需要安装 CMake：
+
+- 方式一：[官方下载地址](https://cmake.org/download/)
+- 方式二：使用 Homebrew 安装
+
+本项目使用 Homebrew 的安装命令 `brew install cmake` 安装一键搞定。
+
+> 温馨提示：例如 TypeScript 中的 tsc 命令，当项目复杂后，需要使用类似 Gulp 或者 Webpack 的编译工具。
+
+
+安装完成后，在项目目录下新建 `CMakeLists.txt` 配置文件，配置如下：
+
+``` txt
+# 最低要求版本
+cmake_minimum_required(VERSION 3.2)
+
+# 设置项目名称
+project(main)
+
+# 设置 C++14 保准，类似于 g++ 中的 -std 参数
+set(CMAKE_CXX_STANDARD 14)
+
+# 设置生成的可执行文件，类似于 g++ 中的 -o 参数
+add_executable(main main.cpp)
+
+# 设置 V8 头文件的搜索目录，类似于 g++ 中的 -I 参数
+include_directories(./v8/include)
+
+# 设置 V8 的预处理宏定义，类似于 g++ 中的 -D 参数
+target_compile_definitions(main PRIVATE V8_COMPRESS_POINTERS)
+
+# 设置动态库的查找地址，类似于 g++ 中的 -L 参数
+target_link_directories(main PRIVATE ./v8/lib)
+
+# 设置需要链接的 V8 动态库，类似于 g++ 中的 -l 参数
+target_link_libraries(main PRIVATE v8 v8_libplatform)
+```
+
+进行编译和执行：
+
+```bash
+# 生成 MakeFile
+cmake .
+# 编译
+make
+# 执行
+./main
+Hello, World!
 ```

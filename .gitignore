@@ -1,3 +1,7 @@
 .vscode
 .DS_Store
 main
+cmake_*
+CMakeFiles
+CMakeCache*
+MakeFile
