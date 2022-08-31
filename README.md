@@ -1,115 +1,103 @@
-# 库的制作和使用
+# V8 动态库的使用
+
+使用 brew 下载 [V8](https://formulae.brew.sh/formula/v8)，本项目下载的版本为 10.2.154.4。
 
 
-## 静态库
+## 目录结构
 
-### 制作
-
-首先将库的源文件 `add.h` 编译成 `.o` 为后缀的目标文件：
-
-``` bash
-# 进入 lib 所在目录
-cd lib
-# 执行编译
-g++ -c add.cpp
+``` 
+├── v8 						# 库源码
+│   ├── inclide/ 	# 头文件
+│   ├── lib/		  # 动态库
+└── main.cpp 			# 应用源码
 ```
 
-然后通过 ar 工具生成 `.a` 为后缀的静态库文件：
+## 引入使用
 
-``` bash
-ar -crv libadd.a add.o
-```
-
-### 使用
-
-在 `main.cpp` 中引入 `add.h` 头文件：
+将 V8 官方的 10.2.154.4 版本的 [Hello World Example](https://github.com/v8/v8/blob/10.2.154.4/samples/hello-world.cc) 引入 main.cpp 使用，例如
 
 ``` c++
-#include <iostream>
-#include "add.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-int main() {
-    std::cout  << add(1,2) << std::endl;
+#include "include/libplatform/libplatform.h"
+
+// #include "include/v8-context.h"
+// #include "include/v8-initialization.h"
+// #include "include/v8-isolate.h"
+// #include "include/v8-local-handle.h"
+// #include "include/v8-primitive.h"
+
+// 这里简单起见，引入包含上述头文件的 V8 头文件
+#include "include/v8.h"
+
+int main(int argc, char* argv[]) {
+  // Initialize V8.
+  v8::V8::InitializeICUDefaultLocation(argv[0]);
+  v8::V8::InitializeExternalStartupData(argv[0]);
+  std::unique_ptr<v8::Platform> platform = v8::platform::NewDefaultPlatform();
+  v8::V8::InitializePlatform(platform.get());
+#ifdef V8_SANDBOX
+  if (!v8::V8::InitializeSandbox()) {
+    fprintf(stderr, "Error initializing the V8 sandbox\n");
+    return 1;
+  }
+#endif
+  v8::V8::Initialize();
+
+  // Create a new Isolate and make it the current one.
+  v8::Isolate::CreateParams create_params;
+  create_params.array_buffer_allocator =
+      v8::ArrayBuffer::Allocator::NewDefaultAllocator();
+  v8::Isolate* isolate = v8::Isolate::New(create_params);
+  {
+    v8::Isolate::Scope isolate_scope(isolate);
+
+    // Create a stack-allocated handle scope.
+    v8::HandleScope handle_scope(isolate);
+
+    // Create a new context.
+    v8::Local<v8::Context> context = v8::Context::New(isolate);
+
+    // Enter the context for compiling and running the hello world script.
+    v8::Context::Scope context_scope(context);
+
+    {
+      // Create a string containing the JavaScript source code.
+      v8::Local<v8::String> source =
+          v8::String::NewFromUtf8Literal(isolate, "'Hello' + ', World!'");
+
+      // Compile the source code.
+      v8::Local<v8::Script> script =
+          v8::Script::Compile(context, source).ToLocalChecked();
+
+      // Run the script to get the result.
+      v8::Local<v8::Value> result = script->Run(context).ToLocalChecked();
+
+      // Convert the result to an UTF8 string and print it.
+      v8::String::Utf8Value utf8(isolate, result);
+      printf("%s\n", *utf8);
+    }
+  }
+
+  // Dispose the isolate and tear down V8.
+  isolate->Dispose();
+  v8::V8::Dispose();
+  v8::V8::DisposePlatform();
+  delete create_params.array_buffer_allocator;
+  return 0;
 }
 ```
 
-编译 `main.cpp` 并链接静态库 `libadd.a`：
+> 温馨提示：去除了 WebAssembly 的示例代码。
+
+
+将 `mian.cpp` 链接到 V8 动态库，执行编译命令：
 
 ``` bash
-# 回退到 main.cpp 所在目录
-cd ..
-# 执行编译链接
-# -I：指定头文件的搜索目录，默认会优先从 -I 指定的目录开始搜索头文件
-# -L：指定静态库的搜索目录
-# -l：指定链接的静态库，-ladd 会链接 libadd.a 静态库，-l 后可以省略 lib 前缀和 .a 后缀
-g++ main.cpp -Ilib -Llib -ladd -o main
-
+# 编译
+g++ main.cpp -o main -Iv8 -Lv8 -lv8 -lv8_libplatform -std=c++14 -DV8_COMPRESS_POINTERS
 # 执行
 ./main
 ```
-
-
-## 动态库
-
-
-### 制作
-
-制作动态库和静态库的过程类型，首先编译成 `.o` 为后缀的目标文件：
-
-``` bash
-# 进入 lib 所在目录
-cd lib
-
-# 执行编译
-# -fPIC：要求编译生成与绝对地址无关的程序
-g++ -fPIC -c add.cpp
-```
-
-
-然后生成 `.so` 为后缀的动态库：
-
-
-``` bash
-# -shared：指定生成动态链接库
-g++ -shared -o libadd.so add.o
-```
-
-### 使用
-
-`main.cpp` 不需要任何改动，和引入静态链接库一样。执行
-
-``` bash
-g++ main.cpp -Ilib -Llib -ladd -o main
-
-# 执行
-./main
-```
-
-此时发现执行代码报错，如下所示：
-
-``` bash
-dyld[1605]: Library not loaded: libadd.so
-  Referenced from: /Users/xxx/Desktop/xxx/embed-v8/main
-  Reason: tried: 'libadd.so' (no such file), '/usr/local/lib/libadd.so' (no such file), '/usr/lib/libadd.so' (no such file), '/Users/xxx/Desktop/xxx/embed-v8/libadd.so' (no such file), '/usr/local/lib/libadd.so' (no such file), '/usr/lib/libadd.so' (no such file)
-Abort trap: 6
-```
-
-上述报错是说明没有找到被链接的动态库地址，同时提示我们它寻找动态库地址的规则：
-
-``` bash
-'/usr/local/lib/libadd.so'
-'/usr/lib/libadd.so'
-# 猜测 main.cpp 可执行文件所在的目录
-'/Users/xxx/Desktop/xxx/embed-v8/libadd.so'
-```
-
-将 `embed-v8/lib/libadd.so` 复制到 `embed-v8/libadd.so`，并重新执行：
-
-``` bash
-cp lib/libadd.so libadd.so
-
-# 执行
-./main
-```
-
-执行成功。

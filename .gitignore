@@ -1,6 +1,3 @@
 .vscode
 .DS_Store
-add.o
-libadd.a
-libadd.so
 main
