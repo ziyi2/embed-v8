@@ -1,7 +1,3 @@
-.vscode
+v8/hello_world
 .DS_Store
-main
-cmake_*
-CMakeFiles
-CMakeCache*
-MakeFile
+.vscode
