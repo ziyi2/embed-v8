@@ -2,17 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-// 不需要使用 include/libplatform/libplatform.h
 #include "libplatform/libplatform.h"
-
-// #include "include/v8-context.h"
-// #include "include/v8-initialization.h"
-// #include "include/v8-isolate.h"
-// #include "include/v8-local-handle.h"
-// #include "include/v8-primitive.h"
-
-// 这里简单起见，引入包含上述头文件的 V8 库的头文件
-// 注意在编译时会指定头文件的搜索目录 -I 为 ./v8/include，因此不需要使用 include/v8.h
 #include "v8.h"
 
 int main(int argc, char* argv[]) {
@@ -21,12 +11,6 @@ int main(int argc, char* argv[]) {
   v8::V8::InitializeExternalStartupData(argv[0]);
   std::unique_ptr<v8::Platform> platform = v8::platform::NewDefaultPlatform();
   v8::V8::InitializePlatform(platform.get());
-#ifdef V8_SANDBOX
-  if (!v8::V8::InitializeSandbox()) {
-    fprintf(stderr, "Error initializing the V8 sandbox\n");
-    return 1;
-  }
-#endif
   v8::V8::Initialize();
 
   // Create a new Isolate and make it the current one.
