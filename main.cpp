@@ -1,9 +1,13 @@
+// 包含库的头文件，使用 <>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+// 包含自定义的头文件，用 ""
 #include "libplatform/libplatform.h"
 #include "v8.h"
+
+#include "utils.h"
 
 int main(int argc, char* argv[]) {
   // Initialize V8.
@@ -31,9 +35,21 @@ int main(int argc, char* argv[]) {
     v8::Context::Scope context_scope(context);
 
     {
+
+      const char* code = readJavaScriptFile("hello-world.js");
+
+      // 使用 v8::String::NewFromUtf8Literal 时发现第二个参数是 const char (&literal)[N]，无法和 char* 进行类型匹配
+      // 而 v8::String::NewFromUtf8 第二个参数是  char* 
+      // 查看 NewFromUtf8Literal 的注释，发现 v8::String::NewFromUtf8Literal 和 String::NewFromUtf(isolate, "...").ToLocalChecked() 想等
+      // 因此可以使用  v8::String::NewFromUtf8(isolate, code).ToLocalChecked() 
+
+      // v8::String::NewFromUtf8Literal: Allocates a new string from a UTF-8 literal. This is equivalent to calling
+      // String::NewFromUtf(isolate, "...").ToLocalChecked(), but without the check
+      // overhead.
+
       // Create a string containing the JavaScript source code.
       v8::Local<v8::String> source =
-          v8::String::NewFromUtf8Literal(isolate, "'Hello' + ', World!'");
+          v8::String::NewFromUtf8(isolate, code).ToLocalChecked();
 
       // Compile the source code.
       v8::Local<v8::Script> script =
