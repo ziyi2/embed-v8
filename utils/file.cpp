@@ -30,5 +30,6 @@ char* readJavaScriptFile(const char* fileName) {
         file.close();
     }
     
+    
     return code;
 }
