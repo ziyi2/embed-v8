@@ -18,7 +18,7 @@ char* readJavaScriptFile(const char* fileName) {
     ifstream file(fileName, ios::in|ios::ate);
 
     if(file.is_open()) {
-        // 由于打开时定位后末尾，因此可以直接获取文件大小
+        // 由于打开时定位到末尾，因此可以直接获取文件大小
         streampos size = file.tellg();
         // 开辟和文件大小一致的字符串数组空间，从而可以有足够的空间存放文件的字符串内容
         code = new char[size];

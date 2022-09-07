@@ -7,6 +7,7 @@
 #include "libplatform/libplatform.h"
 #include "v8.h"
 
+// 引入自定义的 utils.h 头文件
 #include "utils.h"
 
 int main(int argc, char* argv[]) {
@@ -36,14 +37,19 @@ int main(int argc, char* argv[]) {
 
     {
 
+      // 读取当前 main.cpp 同级目录下的 hello-world.js 文件
       const char* code = readJavaScriptFile("hello-world.js");
 
-      // 使用 v8::String::NewFromUtf8Literal 时发现第二个参数是 const char (&literal)[N]，无法和 char* 进行类型匹配
-      // 而 v8::String::NewFromUtf8 第二个参数是  char* 
-      // 查看 NewFromUtf8Literal 的注释，发现 v8::String::NewFromUtf8Literal 和 String::NewFromUtf(isolate, "...").ToLocalChecked() 想等
-      // 因此可以使用  v8::String::NewFromUtf8(isolate, code).ToLocalChecked() 
+      // 使用官方示例的 v8::String::NewFromUtf8Literal 时
+      // 第二个参数是 const char (&literal)[N]，无法和 char* 进行类型匹配
+      
+      // v8::String::NewFromUtf8 的第二个参数是  char* 
+        
+      // 查看 NewFromUtf8Literal 的注释
+      // 发现 v8::String::NewFromUtf8Literal 和 String::NewFromUtf(isolate, "...").ToLocalChecked() 相等
+      // 可以使用 v8::String::NewFromUtf8(isolate, code).ToLocalChecked() 
 
-      // v8::String::NewFromUtf8Literal: Allocates a new string from a UTF-8 literal. This is equivalent to calling
+      // 注释：v8::String::NewFromUtf8Literal: Allocates a new string from a UTF-8 literal. This is equivalent to calling
       // String::NewFromUtf(isolate, "...").ToLocalChecked(), but without the check
       // overhead.
 

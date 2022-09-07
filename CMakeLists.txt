@@ -10,13 +10,13 @@ set(CMAKE_CXX_STANDARD 17)
 # 将指定 utils 目录下的源文件存放在变量 UTILS 中
 aux_source_directory(utils UTILS)
 
-# 设置生成的可执行文件，类似于 g++ 中的 -o 参数
+# 设置生成的可执行文件，类似于 g++ 中 g++ main.cpp utils/file.o  -o main
 add_executable(main main.cpp ${UTILS})
 
 # 设置 V8 头文件的搜索目录，类似于 g++ 中的 -I 参数
 include_directories(v8/include)
 
-# 设置头文件搜索 utils 目录
+# 设置工具目录的头文件搜索目录
 include_directories(utils)
 
 # 设置 V8 的预处理宏定义，类似于 g++ 中的 -D 参数

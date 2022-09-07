@@ -10,7 +10,7 @@
 
 
 ``` bash
-cd lib
+cd utils
 # -c 不进行链接
 g++ -c  -o file.o file.cpp 
 cd ..
