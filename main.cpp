@@ -29,29 +29,77 @@ int main(int argc, char* argv[]) {
     // Create a stack-allocated handle scope.
     v8::HandleScope handle_scope(isolate);
 
-    // Create a new context.
-    v8::Local<v8::Context> context = v8::Context::New(isolate);
-
-    // Enter the context for compiling and running the hello world script.
-    v8::Context::Scope context_scope(context);
-
     {
 
-      // 读取当前 main.cpp 同级目录下的 hello-world.js 文件
-      const char* code = readJavaScriptFile("hello-world.js");
+      // Create a new context.
+      v8::Local<v8::Context> context = v8::Context::New(isolate);
 
-      // 使用官方示例的 v8::String::NewFromUtf8Literal 时
-      // 第二个参数是 const char (&literal)[N]，无法和 char* 进行类型匹配
-      
-      // v8::String::NewFromUtf8 的第二个参数是  char* 
+      // Enter the context for compiling and running the hello world script.
+      v8::Context::Scope context_scope(context);
+
+      {
+        // 读取当前 main.cpp 同级目录下的 hello-world.js 文件
+        const char* code = readJavaScriptFile("micro1.js");
+
+        // 使用官方示例的 v8::String::NewFromUtf8Literal 时
+        // 第二个参数是 const char (&literal)[N]，无法和 char* 进行类型匹配
         
-      // 查看 NewFromUtf8Literal 的注释
-      // 发现 v8::String::NewFromUtf8Literal 和 String::NewFromUtf(isolate, "...").ToLocalChecked() 相等
-      // 可以使用 v8::String::NewFromUtf8(isolate, code).ToLocalChecked() 
+        // v8::String::NewFromUtf8 的第二个参数是  char* 
+          
+        // 查看 NewFromUtf8Literal 的注释
+        // 发现 v8::String::NewFromUtf8Literal 和 String::NewFromUtf(isolate, "...").ToLocalChecked() 相等
+        // 可以使用 v8::String::NewFromUtf8(isolate, code).ToLocalChecked() 
 
-      // 注释：v8::String::NewFromUtf8Literal: Allocates a new string from a UTF-8 literal. This is equivalent to calling
-      // String::NewFromUtf(isolate, "...").ToLocalChecked(), but without the check
-      // overhead.
+        // 注释：v8::String::NewFromUtf8Literal: Allocates a new string from a UTF-8 literal. This is equivalent to calling
+        // String::NewFromUtf(isolate, "...").ToLocalChecked(), but without the check
+        // overhead.
+
+        // Create a string containing the JavaScript source code.
+        v8::Local<v8::String> source =
+            v8::String::NewFromUtf8(isolate, code).ToLocalChecked();
+
+        // Compile the source code.
+        v8::Local<v8::Script> script =
+            v8::Script::Compile(context, source).ToLocalChecked();
+
+        // Run the script to get the result.
+        v8::Local<v8::Value> result = script->Run(context).ToLocalChecked();
+
+        // Convert the result to an UTF8 string and print it.
+        v8::String::Utf8Value utf8(isolate, result);
+        printf("%s\n", *utf8);
+      }
+
+      {
+        // 读取当前 main.cpp 同级目录下的 hello-world.js 文件
+        const char* code = readJavaScriptFile("micro2.js");
+
+        // Create a string containing the JavaScript source code.
+        v8::Local<v8::String> source =
+            v8::String::NewFromUtf8(isolate, code).ToLocalChecked();
+
+        // Compile the source code.
+        v8::Local<v8::Script> script =
+            v8::Script::Compile(context, source).ToLocalChecked();
+
+        // Run the script to get the result.
+        v8::Local<v8::Value> result = script->Run(context).ToLocalChecked();
+
+        // Convert the result to an UTF8 string and print it.
+        v8::String::Utf8Value utf8(isolate, result);
+        printf("%s\n", *utf8);
+      }
+    }
+
+     {
+      // Create a new context.
+      v8::Local<v8::Context> context = v8::Context::New(isolate);
+
+      // Enter the context for compiling and running the hello world script.
+      v8::Context::Scope context_scope(context);
+
+      // 读取当前 main.cpp 同级目录下的 hello-world.js 文件
+      const char* code = readJavaScriptFile("micro2.js");
 
       // Create a string containing the JavaScript source code.
       v8::Local<v8::String> source =

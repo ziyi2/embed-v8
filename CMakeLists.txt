@@ -21,6 +21,7 @@ include_directories(utils)
 
 # 设置 V8 的预处理宏定义，类似于 g++ 中的 -D 参数
 target_compile_definitions(main PRIVATE V8_COMPRESS_POINTERS)
+target_compile_definitions(main PRIVATE V8_ENABLE_SANDBOX)
 
 # 设置动态库的查找地址，类似于 g++ 中的 -L 参数
 target_link_directories(main PRIVATE v8/lib)

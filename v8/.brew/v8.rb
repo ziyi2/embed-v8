@@ -2,8 +2,8 @@ class V8 < Formula
   desc "Google's JavaScript engine"
   homepage "https://github.com/v8/v8/wiki"
   # Track V8 version from Chrome stable: https://omahaproxy.appspot.com
-  url "https://github.com/v8/v8/archive/10.2.154.4.tar.gz"
-  sha256 "6f4865ffe499f51da3e422cf7e4d85d3dab1b0a99b2d5bf204910ce423505597"
+  url "https://github.com/v8/v8/archive/11.1.277.17.tar.gz"
+  sha256 "1f3918a38fe12faba651c197ed1b594752d0962c63ce08c77efbec45b1ca2097"
   license "BSD-3-Clause"
 
   livecheck do
@@ -12,7 +12,7 @@ class V8 < Formula
   end
 
   depends_on "ninja" => :build
-  depends_on "python@3.10" => :build
+  depends_on "python@3.11" => :build
 
   on_macos do
     depends_on "llvm" => :build
@@ -21,28 +21,26 @@ class V8 < Formula
 
   on_linux do
     depends_on "pkg-config" => :build
-    depends_on "gcc"
     depends_on "glib"
   end
 
   fails_with gcc: "5"
 
   # Look up the correct resource revisions in the DEP file of the specific releases tag
-  # e.g. for CIPD dependency gn: https://chromium.googlesource.com/v8/v8.git/+/refs/tags/10.2.154.4/DEPS#43
+  # e.g. for CIPD dependency gn: https://chromium.googlesource.com/v8/v8.git/+/refs/tags/11.1.277.13/DEPS#59
   resource "gn" do
     url "https://gn.googlesource.com/gn.git",
-        revision: "ae110f8b525009255ba1f9ae96982176d3bfad3d"
+        revision: "5e19d2fb166fbd4f6f32147fbb2f497091a54ad8"
   end
 
-  # e.g.: https://chromium.googlesource.com/v8/v8.git/+/refs/tags/10.2.154.4/DEPS#84
   resource "v8/base/trace_event/common" do
     url "https://chromium.googlesource.com/chromium/src/base/trace_event/common.git",
-        revision: "d115b033c4e53666b535cbd1985ffe60badad082"
+        revision: "68e6038b5350cba18c341cc7c572170af5c5b20c"
   end
 
   resource "v8/build" do
     url "https://chromium.googlesource.com/chromium/src/build.git",
-        revision: "b37c340767cf9e7777d4ca5a588c34c5744df9b2"
+        revision: "3ed59a96db823534faa93dbedce1891bef3e1ad5"
   end
 
   resource "v8/third_party/googletest/src" do
@@ -52,27 +50,23 @@ class V8 < Formula
 
   resource "v8/third_party/icu" do
     url "https://chromium.googlesource.com/chromium/deps/icu.git",
-        revision: "1fd0dbea04448c3f73fe5cb7599f9472f0f107f1"
+        revision: "2c51e5cc7e0a06cd4cd7cb2ddbac445af9b475ba"
   end
 
   resource "v8/third_party/jinja2" do
     url "https://chromium.googlesource.com/chromium/src/third_party/jinja2.git",
-        revision: "ee69aa00ee8536f61db6a451f3858745cf587de6"
+        revision: "264c07d7e64f2874434a3b8039e101ddf1b01e7e"
   end
 
   resource "v8/third_party/markupsafe" do
     url "https://chromium.googlesource.com/chromium/src/third_party/markupsafe.git",
-        revision: "1b882ef6372b58bfd55a3285f37ed801be9137cd"
+        revision: "13f4e8c9e206567eeb13bf585406ddc574005748"
   end
 
   resource "v8/third_party/zlib" do
     url "https://chromium.googlesource.com/chromium/src/third_party/zlib.git",
-        revision: "a6d209ab932df0f1c9d5b7dc67cfa74e8a3272c0"
+        revision: "dca2b915e29ee8d0bb25cd44a84b32e67c8cabd0"
   end
-
-  # Apply patch to fix v8 build with glibc < 2.27. See here for details:
-  # https://libc-alpha.sourceware.narkive.com/XOENQFwL/add-fcntl-sealing-interfaces-from-linux-3-17-to-bits-fcntl-linux-h
-  patch :DATA
 
   def install
     (buildpath/"build").install resource("v8/build")
@@ -86,7 +80,7 @@ class V8 < Formula
     # Build gn from source and add it to the PATH
     (buildpath/"gn").install resource("gn")
     cd "gn" do
-      system "python3", "build/gen.py"
+      system "python3.11", "build/gen.py"
       system "ninja", "-C", "out/", "gn"
     end
     ENV.prepend_path "PATH", buildpath/"gn/out"
@@ -121,10 +115,8 @@ class V8 < Formula
       gn_args[:use_rbe] = false
     end
 
-    # use clang from homebrew llvm formula, because the system clang is unreliable
-    ENV.remove "HOMEBREW_LIBRARY_PATHS", Formula["llvm"].opt_lib # but link against system libc++
     # Make sure private libraries can be found from lib
-    ENV.prepend "LDFLAGS", "-Wl,-rpath,#{libexec}"
+    ENV.prepend "LDFLAGS", "-Wl,-rpath,#{rpath(target: libexec)}"
 
     # Transform to args string
     gn_args_string = gn_args.map { |k, v| "#{k}=#{v}" }.join(" ")
@@ -135,15 +127,20 @@ class V8 < Formula
 
     # Install libraries and headers into libexec so d8 can find them, and into standard directories
     # so other packages can find them and they are linked into HOMEBREW_PREFIX
-    (libexec/"include").install Dir["include/*"]
-    include.install_symlink Dir[libexec/"include/*"]
+    libexec.install "include"
 
-    libexec.install Dir["out.gn/d8", "out.gn/icudtl.dat"]
+    # Make sure we don't symlink non-headers into `include`.
+    header_files_and_directories = (libexec/"include").children.select do |child|
+      (child.extname == ".h") || child.directory?
+    end
+    include.install_symlink header_files_and_directories
+
+    libexec.install "out.gn/d8", "out.gn/icudtl.dat"
     bin.write_exec_script libexec/"d8"
 
-    libexec.install Dir["out.gn/#{shared_library("*")}"]
-    lib.install_symlink Dir[libexec/shared_library("libv8*")]
-    rm Dir[lib/"*.TOC"] if OS.linux? # Remove symlinks to .so.TOC text files
+    libexec.install Pathname.glob("out.gn/#{shared_library("*")}")
+    lib.install_symlink libexec.glob(shared_library("libv8*"))
+    lib.glob("*.TOC").map(&:unlink) if OS.linux? # Remove symlinks to .so.TOC text files
   end
 
   test do
@@ -163,23 +160,9 @@ class V8 < Formula
     EOS
 
     # link against installed libc++
-    system ENV.cxx, "-std=c++14", "test.cpp",
-      "-I#{include}",
-      "-L#{lib}", "-lv8", "-lv8_libplatform"
+    system ENV.cxx, "-std=c++17", "test.cpp",
+                    "-I#{include}", "-L#{lib}",
+                    "-Wl,-rpath,#{libexec}",
+                    "-lv8", "-lv8_libplatform"
   end
 end
-
-__END__
---- a/src/base/platform/platform-posix.cc
-+++ b/src/base/platform/platform-posix.cc
-@@ -88,6 +88,11 @@ extern int madvise(caddr_t, size_t, int);
- extern "C" void* __libc_stack_end;
- #endif
-
-+#ifndef MFD_CLOEXEC
-+#define MFD_CLOEXEC 0x0001U
-+#define MFD_ALLOW_SEALING 0x0002U
-+#endif
-+
- namespace v8 {
- namespace base {
