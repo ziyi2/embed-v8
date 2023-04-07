@@ -32,27 +32,16 @@ int main(int argc, char* argv[]) {
     {
 
       // Create a new context.
+      // 创建一个上下文
       v8::Local<v8::Context> context = v8::Context::New(isolate);
 
-      // Enter the context for compiling and running the hello world script.
+      // Enter the context for compiling and running the script.
+      // 进入该上下文执行 JS 代码
       v8::Context::Scope context_scope(context);
 
       {
-        // 读取当前 main.cpp 同级目录下的 hello-world.js 文件
+        // 读取当前 main.cpp 同级目录下的 micro1.js 文件
         const char* code = readJavaScriptFile("micro1.js");
-
-        // 使用官方示例的 v8::String::NewFromUtf8Literal 时
-        // 第二个参数是 const char (&literal)[N]，无法和 char* 进行类型匹配
-        
-        // v8::String::NewFromUtf8 的第二个参数是  char* 
-          
-        // 查看 NewFromUtf8Literal 的注释
-        // 发现 v8::String::NewFromUtf8Literal 和 String::NewFromUtf(isolate, "...").ToLocalChecked() 相等
-        // 可以使用 v8::String::NewFromUtf8(isolate, code).ToLocalChecked() 
-
-        // 注释：v8::String::NewFromUtf8Literal: Allocates a new string from a UTF-8 literal. This is equivalent to calling
-        // String::NewFromUtf(isolate, "...").ToLocalChecked(), but without the check
-        // overhead.
 
         // Create a string containing the JavaScript source code.
         v8::Local<v8::String> source =
@@ -71,7 +60,7 @@ int main(int argc, char* argv[]) {
       }
 
       {
-        // 读取当前 main.cpp 同级目录下的 hello-world.js 文件
+        // 读取当前 main.cpp 同级目录下的 micro2.js 文件
         const char* code = readJavaScriptFile("micro2.js");
 
         // Create a string containing the JavaScript source code.
@@ -93,12 +82,14 @@ int main(int argc, char* argv[]) {
 
      {
       // Create a new context.
+      // 创建一个新的上下文
       v8::Local<v8::Context> context = v8::Context::New(isolate);
 
       // Enter the context for compiling and running the hello world script.
+      // 进入新的上下文执行 JS 代码
       v8::Context::Scope context_scope(context);
 
-      // 读取当前 main.cpp 同级目录下的 hello-world.js 文件
+      // 读取当前 main.cpp 同级目录下的 micro2.js 文件
       const char* code = readJavaScriptFile("micro2.js");
 
       // Create a string containing the JavaScript source code.
