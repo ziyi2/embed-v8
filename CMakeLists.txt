@@ -4,8 +4,8 @@ cmake_minimum_required(VERSION 3.2)
 # 设置项目名称
 project(main)
 
-# 设置 C++14 保准，类似于 g++ 中的 -std 参数
-set(CMAKE_CXX_STANDARD 14)
+# 设置 C++17 保准，类似于 g++ 中的 -std 参数
+set(CMAKE_CXX_STANDARD 17)
 
 # 设置生成的可执行文件，类似于 g++ 中的 -o 参数
 add_executable(main main.cpp)
@@ -14,7 +14,7 @@ add_executable(main main.cpp)
 include_directories(./v8/include)
 
 # 设置 V8 的预处理宏定义，类似于 g++ 中的 -D 参数
-target_compile_definitions(main PRIVATE V8_COMPRESS_POINTERS)
+target_compile_definitions(main PRIVATE V8_COMPRESS_POINTERS V8_ENABLE_SANDBOX)
 
 # 设置动态库的查找地址，类似于 g++ 中的 -L 参数
 target_link_directories(main PRIVATE ./v8/lib)

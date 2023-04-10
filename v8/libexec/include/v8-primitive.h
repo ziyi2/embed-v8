@@ -20,6 +20,7 @@ class String;
 namespace internal {
 class ExternalString;
 class ScopedExternalStringLock;
+class StringForwardingTable;
 }  // namespace internal
 
 /**
@@ -269,6 +270,7 @@ class V8_EXPORT String : public Name {
    private:
     friend class internal::ExternalString;
     friend class v8::String;
+    friend class internal::StringForwardingTable;
     friend class internal::ScopedExternalStringLock;
   };
 
@@ -775,20 +777,19 @@ Local<String> String::Empty(Isolate* isolate) {
   using I = internal::Internals;
   I::CheckInitialized(isolate);
   S* slot = I::GetRoot(isolate, I::kEmptyStringRootIndex);
-  return Local<String>(reinterpret_cast<String*>(slot));
+  return Local<String>::New(reinterpret_cast<String*>(slot));
 }
 
 String::ExternalStringResource* String::GetExternalStringResource() const {
   using A = internal::Address;
   using I = internal::Internals;
-  A obj = *reinterpret_cast<const A*>(this);
+  A obj = internal::ValueHelper::ValueToAddress(this);
 
   ExternalStringResource* result;
   if (I::IsExternalTwoByteString(I::GetInstanceType(obj))) {
-    internal::Isolate* isolate = I::GetIsolateForSandbox(obj);
-    A value =
-        I::ReadExternalPointerField(isolate, obj, I::kStringResourceOffset,
-                                    internal::kExternalStringResourceTag);
+    Isolate* isolate = I::GetIsolateForSandbox(obj);
+    A value = I::ReadExternalPointerField<internal::kExternalStringResourceTag>(
+        isolate, obj, I::kStringResourceOffset);
     result = reinterpret_cast<String::ExternalStringResource*>(value);
   } else {
     result = GetExternalStringResourceSlow();
@@ -803,16 +804,15 @@ String::ExternalStringResourceBase* String::GetExternalStringResourceBase(
     String::Encoding* encoding_out) const {
   using A = internal::Address;
   using I = internal::Internals;
-  A obj = *reinterpret_cast<const A*>(this);
+  A obj = internal::ValueHelper::ValueToAddress(this);
   int type = I::GetInstanceType(obj) & I::kStringRepresentationAndEncodingMask;
   *encoding_out = static_cast<Encoding>(type & I::kStringEncodingMask);
   ExternalStringResourceBase* resource;
   if (type == I::kExternalOneByteRepresentationTag ||
       type == I::kExternalTwoByteRepresentationTag) {
-    internal::Isolate* isolate = I::GetIsolateForSandbox(obj);
-    A value =
-        I::ReadExternalPointerField(isolate, obj, I::kStringResourceOffset,
-                                    internal::kExternalStringResourceTag);
+    Isolate* isolate = I::GetIsolateForSandbox(obj);
+    A value = I::ReadExternalPointerField<internal::kExternalStringResourceTag>(
+        isolate, obj, I::kStringResourceOffset);
     resource = reinterpret_cast<ExternalStringResourceBase*>(value);
   } else {
     resource = GetExternalStringResourceBaseSlow(encoding_out);
@@ -830,7 +830,7 @@ V8_INLINE Local<Primitive> Undefined(Isolate* isolate) {
   using I = internal::Internals;
   I::CheckInitialized(isolate);
   S* slot = I::GetRoot(isolate, I::kUndefinedValueRootIndex);
-  return Local<Primitive>(reinterpret_cast<Primitive*>(slot));
+  return Local<Primitive>::New(reinterpret_cast<Primitive*>(slot));
 }
 
 V8_INLINE Local<Primitive> Null(Isolate* isolate) {
@@ -838,7 +838,7 @@ V8_INLINE Local<Primitive> Null(Isolate* isolate) {
   using I = internal::Internals;
   I::CheckInitialized(isolate);
   S* slot = I::GetRoot(isolate, I::kNullValueRootIndex);
-  return Local<Primitive>(reinterpret_cast<Primitive*>(slot));
+  return Local<Primitive>::New(reinterpret_cast<Primitive*>(slot));
 }
 
 V8_INLINE Local<Boolean> True(Isolate* isolate) {
@@ -846,7 +846,7 @@ V8_INLINE Local<Boolean> True(Isolate* isolate) {
   using I = internal::Internals;
   I::CheckInitialized(isolate);
   S* slot = I::GetRoot(isolate, I::kTrueValueRootIndex);
-  return Local<Boolean>(reinterpret_cast<Boolean*>(slot));
+  return Local<Boolean>::New(reinterpret_cast<Boolean*>(slot));
 }
 
 V8_INLINE Local<Boolean> False(Isolate* isolate) {
@@ -854,7 +854,7 @@ V8_INLINE Local<Boolean> False(Isolate* isolate) {
   using I = internal::Internals;
   I::CheckInitialized(isolate);
   S* slot = I::GetRoot(isolate, I::kFalseValueRootIndex);
-  return Local<Boolean>(reinterpret_cast<Boolean*>(slot));
+  return Local<Boolean>::New(reinterpret_cast<Boolean*>(slot));
 }
 
 Local<Boolean> Boolean::New(Isolate* isolate, bool value) {

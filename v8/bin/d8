@@ -1,2 +1,2 @@
 #!/bin/bash
-exec "/usr/local/Cellar/v8/10.2.154.4/libexec/d8" "$@"
+exec "/opt/homebrew/Cellar/v8/11.2.214.9/libexec/d8" "$@"

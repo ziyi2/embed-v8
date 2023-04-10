@@ -1,5 +1,5 @@
 {
-  "homebrew_version": "3.5.10",
+  "homebrew_version": "4.0.11-52-g97d7a5c",
   "used_options": [
 
   ],
@@ -8,33 +8,39 @@
   ],
   "built_as_bottle": true,
   "poured_from_bottle": true,
+  "loaded_from_api": true,
   "installed_as_dependency": false,
   "installed_on_request": true,
-  "changed_files": null,
-  "time": 1661392650,
-  "source_modified_time": 0,
+  "changed_files": [
+    "bin/d8"
+  ],
+  "time": 1681125999,
+  "source_modified_time": 1679318470,
   "compiler": "clang",
   "aliases": [
-    "v8@10.2"
+    "v8@11.2"
   ],
   "runtime_dependencies": [
 
   ],
   "source": {
-    "path": "/usr/local/Homebrew/Library/Taps/homebrew/homebrew-core/Formula/v8.rb",
-    "tap": "homebrew/core",
-    "tap_git_head": "204c2637872e0c51a1f913c77b594694098c087d",
     "spec": "stable",
     "versions": {
-      "stable": "10.2.154.4",
+      "stable": "11.2.214.9",
       "head": null,
       "version_scheme": 0
-    }
+    },
+    "path": "/opt/homebrew/Library/Taps/homebrew/homebrew-core/Formula/v8.rb",
+    "tap_git_head": "bd57d6fd75dd07203c864e0409ebdce284ff99b2",
+    "tap": "homebrew/core"
   },
-  "arch": "x86_64",
+  "arch": "arm64",
   "built_on": {
     "os": "Macintosh",
-    "os_version": "macOS 12",
-    "cpu_family": "kabylake"
+    "os_version": "macOS 13",
+    "cpu_family": "dunno",
+    "xcode": "14.2",
+    "clt": "14.2.0.0.1.1668646533",
+    "preferred_perl": "5.30"
   }
 }

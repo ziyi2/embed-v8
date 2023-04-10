@@ -102,9 +102,9 @@ int main(int argc, char* argv[]) {
 # -I：搜索头文件时搜索当前项目的 v8 目录下的头文件，因此 include/v8.h 可以被识别
 # -L：指定动态库的搜索目录为 v8
 # -l：链接 lib 目录下的 libv8.dylib 和 libv8_libplatform.dylib 两个动态库
-# -std：使用 c++14 标准
+# -std：使用 c++17 标准
 # -D：编译时宏定义 V8_COMPRESS_POINTERS，开启 V8 的指针压缩
-g++ main.cpp -o main -Iv8/include -Lv8 -lv8 -lv8_libplatform -std=c++14 -DV8_COMPRESS_POINTERS
+g++ main.cpp -o main -Iv8/include -Lv8 -lv8 -lv8_libplatform -std=c++17 -DV8_COMPRESS_POINTERS -DV8_ENABLE_SANDBOX
 # 执行
 ./main
 Hello, World!

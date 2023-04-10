@@ -181,7 +181,15 @@ class PersistentValueMapBase {
    * Get value stored in map.
    */
   Local<V> Get(const K& key) {
+#ifdef V8_ENABLE_CONSERVATIVE_STACK_SCANNING
+    auto p = FromVal(Traits::Get(&impl_, key));
+    if (p == nullptr) {
+      return Local<V>();
+    }
+    return Local<V>::New(p);
+#else
     return Local<V>::New(isolate_, FromVal(Traits::Get(&impl_, key)));
+#endif
   }
 
   /**
@@ -236,7 +244,11 @@ class PersistentValueMapBase {
         : value_(other.value_) { }
 
     Local<V> NewLocal(Isolate* isolate) const {
+#ifdef V8_ENABLE_CONSERVATIVE_STACK_SCANNING
+      return Local<V>::New(FromVal(value_));
+#else
       return Local<V>::New(isolate, FromVal(value_));
+#endif
     }
     bool IsEmpty() const {
       return value_ == kPersistentContainerNotFound;
@@ -537,7 +549,6 @@ class StdGlobalValueMap : public GlobalValueMap<K, V, Traits> {
       : GlobalValueMap<K, V, Traits>(isolate) {}
 };
 
-
 class DefaultPersistentValueVectorTraits {
  public:
   typedef std::vector<PersistentContainerValue> Impl;
@@ -562,7 +573,6 @@ class DefaultPersistentValueVectorTraits {
   }
 };
 
-
 /**
  * A vector wrapper that safely stores Global values.
  * C++11 embedders don't need this class, as they can use Global
@@ -573,8 +583,8 @@ class DefaultPersistentValueVectorTraits {
  * PersistentContainerValue, with all conversion into and out of V8
  * handles being transparently handled by this class.
  */
-template<typename V, typename Traits = DefaultPersistentValueVectorTraits>
-class PersistentValueVector {
+template <typename V, typename Traits = DefaultPersistentValueVectorTraits>
+class V8_DEPRECATE_SOON("Use std::vector<Global<V>>.") PersistentValueVector {
  public:
   explicit PersistentValueVector(Isolate* isolate) : isolate_(isolate) { }
 
@@ -615,7 +625,12 @@ class PersistentValueVector {
    * Retrieve the i-th value in the vector.
    */
   Local<V> Get(size_t index) const {
+#ifdef V8_ENABLE_CONSERVATIVE_STACK_SCANNING
+    return Local<V>::New(
+        isolate_, *reinterpret_cast<V**>(FromVal(Traits::Get(&impl_, index))));
+#else
     return Local<V>::New(isolate_, FromVal(Traits::Get(&impl_, index)));
+#endif
   }
 
   /**
